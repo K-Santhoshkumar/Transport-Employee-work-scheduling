@@ -590,9 +590,6 @@ $routes = $stmt->fetchAll(PDO::FETCH_COLUMN);
                 </tbody>
             </table>
         </div>
-                </tbody>
-            </table>
-        </div>
     </main>
 
     <script>
