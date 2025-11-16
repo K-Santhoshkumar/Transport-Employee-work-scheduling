@@ -349,13 +349,21 @@ $routes = $stmt->fetchAll(PDO::FETCH_COLUMN);
                         <i class="fas fa-tachometer-alt"></i>
                         Dashboard
                     </a>
+                    <a href="about.php" class="nav-link">
+                        <i class="fas fa-info-circle"></i>
+                        About
+                    </a>
+                    <a href="contact.php" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        Contact
+                    </a>
                     <a href="profile.php" class="nav-link">
                         <i class="fas fa-user"></i>
                         Profile
                     </a>
                     <a href="schedules.php" class="nav-link" style="background: var(--primary-color);">
-                        <i class="fas fa-calendar"></i>
-                        Schedules
+                        <i class="fas fa-search"></i>
+                        Search
                     </a>
                     <a href="logout.php" class="nav-link" style="background: var(--danger-color);">
                         <i class="fas fa-sign-out-alt"></i>
