@@ -376,13 +376,184 @@ $routes = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     <main class="container dashboard">
         <div class="dashboard-header">
-            <h1 class="dashboard-title">My Schedules</h1>
+            <h1 class="dashboard-title">Search Schedules</h1>
+            <p style="color: var(--text-secondary);">Find and filter your work schedules</p>
         </div>
 
-        <div class="table-container">
-            <div class="table-header">
-                <h2 class="table-title">All Schedules</h2>
+        <div class="search-container">
+            <h2 class="search-title">
+                <i class="fas fa-filter"></i>
+                Advanced Search Filters
+            </h2>
+
+            <div class="quick-filters">
+                <button class="quick-filter-btn" onclick="setQuickFilter('today')">
+                    <i class="fas fa-calendar-day"></i>
+                    Today
+                </button>
+                <button class="quick-filter-btn" onclick="setQuickFilter('week')">
+                    <i class="fas fa-calendar-week"></i>
+                    This Week
+                </button>
+                <button class="quick-filter-btn" onclick="setQuickFilter('month')">
+                    <i class="fas fa-calendar-alt"></i>
+                    This Month
+                </button>
+                <button class="quick-filter-btn" onclick="setQuickFilter('30days')">
+                    <i class="fas fa-history"></i>
+                    Last 30 Days
+                </button>
             </div>
+
+            <form method="GET" id="searchForm">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="start_date">
+                            <i class="fas fa-calendar"></i>
+                            Start Date
+                        </label>
+                        <input type="date" id="start_date" name="start_date" value="<?php echo htmlspecialchars($start_date); ?>">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="end_date">
+                            <i class="fas fa-calendar-check"></i>
+                            End Date
+                        </label>
+                        <input type="date" id="end_date" name="end_date" value="<?php echo htmlspecialchars($end_date); ?>">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="shift_type">
+                            <i class="fas fa-clock"></i>
+                            Shift Type
+                        </label>
+                        <select id="shift_type" name="shift_type">
+                            <option value="">All Shifts</option>
+                            <option value="morning" <?php echo $shift_type === 'morning' ? 'selected' : ''; ?>>
+                                Morning Shift (6:00 AM - 2:00 PM)
+                            </option>
+                            <option value="afternoon" <?php echo $shift_type === 'afternoon' ? 'selected' : ''; ?>>
+                                Afternoon Shift (2:00 PM - 10:00 PM)
+                            </option>
+                            <option value="night" <?php echo $shift_type === 'night' ? 'selected' : ''; ?>>
+                                Night Shift (10:00 PM - 6:00 AM)
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="duty_type">
+                            <i class="fas fa-briefcase"></i>
+                            Duty Type
+                        </label>
+                        <select id="duty_type" name="duty_type">
+                            <option value="">All Duty Types</option>
+                            <?php foreach ($duty_types as $type): ?>
+                                <option value="<?php echo htmlspecialchars($type); ?>" <?php echo $duty_type === $type ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($type); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="bus_number">
+                            <i class="fas fa-bus"></i>
+                            Bus Number
+                        </label>
+                        <select id="bus_number" name="bus_number">
+                            <option value="">All Buses</option>
+                            <?php foreach ($bus_numbers as $bus): ?>
+                                <option value="<?php echo htmlspecialchars($bus); ?>" <?php echo $bus_number === $bus ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($bus); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="route">
+                            <i class="fas fa-route"></i>
+                            Route
+                        </label>
+                        <select id="route" name="route">
+                            <option value="">All Routes</option>
+                            <?php foreach ($routes as $route): ?>
+                                <option value="<?php echo htmlspecialchars($route); ?>" <?php echo $route === $route ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($route); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="search-actions">
+                    <button type="submit" class="btn btn-primary btn-search">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-reset" onclick="resetFilters()">
+                        <i class="fas fa-redo"></i>
+                        Reset
+                    </button>
+
+                    <div class="export-buttons">
+                        <button type="button" class="export-btn" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i>
+                            Export Excel
+                        </button>
+                        <button type="button" class="export-btn" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i>
+                            Export PDF
+                        </button>
+                        <button type="button" class="export-btn" onclick="window.print()">
+                            <i class="fas fa-print"></i>
+                            Print
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <?php if ($start_date || $end_date || $shift_type || $duty_type || $bus_number || $route): ?>
+            <div class="results-info">
+                <div class="results-count">
+                    <strong><?php echo $total_schedules; ?></strong> schedules found
+                    <?php if ($total_schedules > $per_page): ?>
+                        (showing page <?php echo $page; ?> of <?php echo $total_pages; ?>)
+                    <?php endif; ?>
+                </div>
+                <?php if ($total_pages > 1): ?>
+                    <div class="pagination">
+                        <?php if ($page > 1): ?>
+                            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>" class="page-link">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        <?php endif; ?>
+
+                        <?php
+                        $start_page = max(1, $page - 2);
+                        $end_page = min($total_pages, $page + 2);
+                        for ($i = $start_page; $i <= $end_page; $i++):
+                        ?>
+                            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>"
+                               class="page-link <?php echo $i === $page ? 'active' : ''; ?>">
+                                <?php echo $i; ?>
+                            </a>
+                        <?php endfor; ?>
+
+                        <?php if ($page < $total_pages): ?>
+                            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>" class="page-link">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
