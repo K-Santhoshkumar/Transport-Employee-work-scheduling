@@ -590,6 +590,100 @@ $routes = $stmt->fetchAll(PDO::FETCH_COLUMN);
                 </tbody>
             </table>
         </div>
+                </tbody>
+            </table>
+        </div>
     </main>
+
+    <script>
+        function setQuickFilter(type) {
+            const today = new Date();
+            const startDate = document.getElementById('start_date');
+            const endDate = document.getElementById('end_date');
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Add active class to clicked button
+            event.target.closest('.quick-filter-btn').classList.add('active');
+
+            switch(type) {
+                case 'today':
+                    startDate.value = today.toISOString().split('T')[0];
+                    endDate.value = today.toISOString().split('T')[0];
+                    break;
+                case 'week':
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay());
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    startDate.value = weekStart.toISOString().split('T')[0];
+                    endDate.value = weekEnd.toISOString().split('T')[0];
+                    break;
+                case 'month':
+                    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                    startDate.value = monthStart.toISOString().split('T')[0];
+                    endDate.value = monthEnd.toISOString().split('T')[0];
+                    break;
+                case '30days':
+                    const thirtyDaysAgo = new Date(today);
+                    thirtyDaysAgo.setDate(today.getDate() - 30);
+                    startDate.value = thirtyDaysAgo.toISOString().split('T')[0];
+                    endDate.value = today.toISOString().split('T')[0];
+                    break;
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('searchForm').reset();
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            window.location.href = 'schedules.php';
+        }
+
+        function exportToExcel() {
+            // In a real application, this would generate and download an Excel file
+            // For now, we'll show a message and could implement server-side export
+            const params = new URLSearchParams(window.location.search);
+            params.set('export', 'excel');
+            window.location.href = 'schedules.php?' + params.toString();
+        }
+
+        function exportToPDF() {
+            // In a real application, this would generate and download a PDF file
+            // For now, we'll show a message and could implement server-side export
+            const params = new URLSearchParams(window.location.search);
+            params.set('export', 'pdf');
+            window.location.href = 'schedules.php?' + params.toString();
+        }
+
+        // Handle export requests
+        <?php
+        if (isset($_GET['export'])) {
+            if ($_GET['export'] === 'excel') {
+                echo "alert('Excel export would be generated here. Feature requires server-side implementation.');";
+            } elseif ($_GET['export'] === 'pdf') {
+                echo "alert('PDF export would be generated here. Feature requires server-side implementation.');";
+            }
+        }
+        ?>
+
+        // Auto-submit form on filter change for better UX
+        document.querySelectorAll('.filter-group select').forEach(select => {
+            select.addEventListener('change', function() {
+                // Only auto-submit if we already have a search or if this is the first filter being set
+                const hasActiveFilters = document.querySelector('.quick-filter-btn.active') ||
+                                      document.querySelector('#start_date').value ||
+                                      document.querySelector('#end_date').value;
+                if (hasActiveFilters) {
+                    document.getElementById('searchForm').submit();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
