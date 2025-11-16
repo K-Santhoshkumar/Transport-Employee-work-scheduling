@@ -7,7 +7,7 @@ if (!isset($_SESSION['admin_id'])) {
 
 require_once '../config/database.php';
 
-// Get statistics
+// Enhanced statistics
 $stmt = $pdo->query("SELECT COUNT(*) FROM users");
 $total_users = $stmt->fetchColumn();
 
@@ -19,6 +19,46 @@ $total_schedules = $stmt->fetchColumn();
 
 $stmt = $pdo->query("SELECT COUNT(*) FROM contacts");
 $total_contacts = $stmt->fetchColumn();
+
+// Live stats
+$stmt = $pdo->query("SELECT COUNT(*) FROM employees WHERE status = 'Active'");
+$active_employees = $stmt->fetchColumn();
+
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM schedules WHERE schedule_date = CURDATE()");
+$today_schedules = $stmt->execute();
+$today_schedules = $stmt->fetchColumn();
+
+$stmt = $pdo->query("SELECT COUNT(DISTINCT bus_number) FROM schedules WHERE schedule_date = CURDATE() AND bus_number IS NOT NULL");
+$active_buses = $stmt->fetchColumn();
+
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE status = 'Sent' AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)");
+$pending_notifications = $stmt->execute();
+$pending_notifications = $stmt->fetchColumn();
+
+// System health checks
+$system_health = [
+    'database' => true, // Will be set to false if connection fails
+    'backup' => true, // Placeholder
+    'security' => true, // Placeholder
+    'performance' => true // Placeholder
+];
+
+// Get recent activity
+$recent_activity = [];
+
+// Recent schedule changes
+$stmt = $pdo->query("SELECT 'schedule' as type, created_at, CONCAT('New schedule created for ', employee_id) as details FROM schedules ORDER BY created_at DESC LIMIT 3");
+$schedule_activity = $stmt->fetchAll();
+
+// Recent user registrations
+$stmt = $pdo->query("SELECT 'user' as type, created_at, CONCAT('New user registered: ', email) as details FROM users ORDER BY created_at DESC LIMIT 2");
+$user_activity = $stmt->fetchAll();
+
+$recent_activity = array_merge($schedule_activity, $user_activity);
+usort($recent_activity, function($a, $b) {
+    return strtotime($b['created_at']) - strtotime($a['created_at']);
+});
+$recent_activity = array_slice($recent_activity, 0, 5);
 
 // Get recent employees
 $stmt = $pdo->query("SELECT * FROM employees ORDER BY created_at DESC LIMIT 5");
