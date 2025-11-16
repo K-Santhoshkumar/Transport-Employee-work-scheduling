@@ -370,22 +370,186 @@ $recent_employees = $stmt->fetchAll();
             <p style="color: var(--text-secondary);">Welcome, <?php echo htmlspecialchars($_SESSION['admin_name']); ?>!</p>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number"><?php echo $total_users; ?></div>
-                <div class="stat-label">Total Users</div>
+        <div class="enhanced-dashboard">
+            <!-- Live Stats -->
+            <div class="live-stats">
+                <div class="live-stat-card">
+                    <div class="live-stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="live-stat-number"><?php echo $active_employees; ?></div>
+                    <div class="live-stat-label">Active Employees</div>
+                </div>
+                <div class="live-stat-card">
+                    <div class="live-stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="live-stat-number"><?php echo $today_schedules; ?></div>
+                    <div class="live-stat-label">Today's Schedules</div>
+                </div>
+                <div class="live-stat-card">
+                    <div class="live-stat-icon">
+                        <i class="fas fa-bus"></i>
+                    </div>
+                    <div class="live-stat-number"><?php echo $active_buses; ?></div>
+                    <div class="live-stat-label">Active Buses</div>
+                </div>
+                <div class="live-stat-card">
+                    <div class="live-stat-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="live-stat-number"><?php echo $pending_notifications; ?></div>
+                    <div class="live-stat-label">Recent Notifications</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number"><?php echo $total_employees; ?></div>
-                <div class="stat-label">Total Employees</div>
+
+            <!-- Dashboard Row -->
+            <div class="dashboard-row">
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3 class="quick-actions-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </h3>
+                    <div class="quick-action-buttons">
+                        <a href="employees.php?action=add" class="quick-action-btn">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Add Employee</span>
+                        </a>
+                        <a href="schedules.php?action=add" class="quick-action-btn">
+                            <i class="fas fa-calendar-plus"></i>
+                            <span>Create Schedule</span>
+                        </a>
+                        <a href="notifications.php" class="quick-action-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Send Notification</span>
+                        </a>
+                        <a href="reports.php" class="quick-action-btn">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Generate Report</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- System Health -->
+                <div class="system-health">
+                    <h3 class="health-title">
+                        <i class="fas fa-heartbeat"></i>
+                        System Health
+                    </h3>
+                    <div class="health-items">
+                        <div class="health-item">
+                            <div class="health-status <?php echo $system_health['database'] ? 'online' : 'offline'; ?>"></div>
+                            <span class="health-label">Database</span>
+                        </div>
+                        <div class="health-item">
+                            <div class="health-status <?php echo $system_health['backup'] ? 'online' : 'offline'; ?>"></div>
+                            <span class="health-label">Backups</span>
+                        </div>
+                        <div class="health-item">
+                            <div class="health-status <?php echo $system_health['security'] ? 'online' : 'offline'; ?>"></div>
+                            <span class="health-label">Security</span>
+                        </div>
+                        <div class="health-item">
+                            <div class="health-status <?php echo $system_health['performance'] ? 'online' : 'offline'; ?>"></div>
+                            <span class="health-label">Performance</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number"><?php echo $total_schedules; ?></div>
-                <div class="stat-label">Total Schedules</div>
+
+            <!-- Traditional Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo $total_users; ?></div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo $total_employees; ?></div>
+                    <div class="stat-label">Total Employees</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo $total_schedules; ?></div>
+                    <div class="stat-label">Total Schedules</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo $total_contacts; ?></div>
+                    <div class="stat-label">Contact Messages</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number"><?php echo $total_contacts; ?></div>
-                <div class="stat-label">Contact Messages</div>
+
+            <!-- Bottom Row -->
+            <div class="dashboard-row">
+                <!-- Recent Activity Feed -->
+                <div class="activity-feed">
+                    <h3 class="activity-title">
+                        <i class="fas fa-stream"></i>
+                        Recent Activity
+                    </h3>
+                    <?php if (empty($recent_activity)): ?>
+                        <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                            No recent activity
+                        </p>
+                    <?php else: ?>
+                        <?php foreach ($recent_activity as $activity): ?>
+                            <div class="activity-item">
+                                <div class="activity-icon <?php echo $activity['type']; ?>">
+                                    <i class="fas fa-<?php echo $activity['type'] === 'schedule' ? 'calendar' : 'user'; ?>"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-details">
+                                        <?php echo htmlspecialchars($activity['details']); ?>
+                                    </div>
+                                    <div class="activity-time">
+                                        <?php echo time_ago(strtotime($activity['created_at'])); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Recent Employees -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2 class="table-title">Recent Employees</h2>
+                        <a href="employees.php" class="btn btn-primary">Manage All</a>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Designation</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($recent_employees)): ?>
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: var(--text-secondary);">No employees found</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($recent_employees as $employee): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($employee['name']); ?></td>
+                                        <td><?php echo htmlspecialchars($employee['email']); ?></td>
+                                        <td><?php echo htmlspecialchars($employee['designation']); ?></td>
+                                        <td><?php echo htmlspecialchars($employee['department']); ?></td>
+                                        <td>
+                                            <span style="color: <?php echo $employee['status'] === 'Active' ? 'var(--success-color)' : 'var(--danger-color)'; ?>;">
+                                                <?php echo htmlspecialchars($employee['status']); ?>
+                                            </span>
+                                        </td>
+                                        <td><?php echo date('M d, Y', strtotime($employee['created_at'])); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
