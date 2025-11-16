@@ -7,16 +7,101 @@ if (!isset($_SESSION['user_id'])) {
 
 require_once '../config/database.php';
 
-// Get all schedules for this user
+// Get filter values
+$start_date = $_GET['start_date'] ?? '';
+$end_date = $_GET['end_date'] ?? '';
+$shift_type = $_GET['shift_type'] ?? '';
+$duty_type = $_GET['duty_type'] ?? '';
+$bus_number = $_GET['bus_number'] ?? '';
+$route = $_GET['route'] ?? '';
+$page = max(1, intval($_GET['page'] ?? 1));
+$per_page = 20;
+$offset = ($page - 1) * $per_page;
+
+// Build query with filters
+$query = "
+    SELECT s.*, e.name as employee_name
+    FROM schedules s
+    JOIN employees e ON s.employee_id = e.id
+    WHERE e.email = (SELECT email FROM users WHERE id = ?)
+";
+$params = [$_SESSION['user_id']];
+
+if ($start_date) {
+    $query .= " AND s.schedule_date >= ?";
+    $params[] = $start_date;
+}
+
+if ($end_date) {
+    $query .= " AND s.schedule_date <= ?";
+    $params[] = $end_date;
+}
+
+if ($shift_type) {
+    if ($shift_type === 'morning') {
+        $query .= " AND (s.shift_time LIKE '%AM%' OR s.shift_time LIKE '6:00%' OR s.shift_time LIKE '7:00%' OR s.shift_time LIKE '8:00%')";
+    } elseif ($shift_type === 'afternoon') {
+        $query .= " AND (s.shift_time LIKE '2:00%' OR s.shift_time LIKE '3:00%' OR s.shift_time LIKE '4:00%')";
+    } elseif ($shift_type === 'night') {
+        $query .= " AND (s.shift_time LIKE '%PM%' OR s.shift_time LIKE '10:00%' OR s.shift_time LIKE '11:00%')";
+    }
+}
+
+if ($duty_type) {
+    $query .= " AND s.duty_type = ?";
+    $params[] = $duty_type;
+}
+
+if ($bus_number) {
+    $query .= " AND s.bus_number = ?";
+    $params[] = $bus_number;
+}
+
+if ($route) {
+    $query .= " AND s.route = ?";
+    $params[] = $route;
+}
+
+// Get total count for pagination
+$count_query = str_replace("SELECT s.*, e.name as employee_name", "SELECT COUNT(*)", $query);
+$stmt = $pdo->prepare($count_query);
+$stmt->execute($params);
+$total_schedules = $stmt->fetchColumn();
+$total_pages = ceil($total_schedules / $per_page);
+
+// Get schedules for current page
+$query .= " ORDER BY s.schedule_date DESC LIMIT ? OFFSET ?";
+$params[] = $per_page;
+$params[] = $offset;
+
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$schedules = $stmt->fetchAll();
+
+// Get unique values for filter dropdowns
 $stmt = $pdo->prepare("
-    SELECT s.*, e.name as employee_name 
-    FROM schedules s 
-    JOIN employees e ON s.employee_id = e.id 
-    WHERE e.email = (SELECT email FROM users WHERE id = ?) 
-    ORDER BY s.schedule_date DESC
+    SELECT DISTINCT duty_type FROM schedules s
+    JOIN employees e ON s.employee_id = e.id
+    WHERE e.email = (SELECT email FROM users WHERE id = ?)
 ");
 $stmt->execute([$_SESSION['user_id']]);
-$schedules = $stmt->fetchAll();
+$duty_types = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+$stmt = $pdo->prepare("
+    SELECT DISTINCT bus_number FROM schedules s
+    JOIN employees e ON s.employee_id = e.id
+    WHERE e.email = (SELECT email FROM users WHERE id = ?) AND bus_number IS NOT NULL AND bus_number != ''
+");
+$stmt->execute([$_SESSION['user_id']]);
+$bus_numbers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+$stmt = $pdo->prepare("
+    SELECT DISTINCT route FROM schedules s
+    JOIN employees e ON s.employee_id = e.id
+    WHERE e.email = (SELECT email FROM users WHERE id = ?) AND route IS NOT NULL AND route != ''
+");
+$stmt->execute([$_SESSION['user_id']]);
+$routes = $stmt->fetchAll(PDO::FETCH_COLUMN);
 ?>
 <!DOCTYPE html>
 <html lang="en">
