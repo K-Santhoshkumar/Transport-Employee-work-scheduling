@@ -36,6 +36,8 @@ $recent_schedules = $stmt->fetchAll();
     <title>User Dashboard - Transport Management</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/style.css">
+    <link rel="stylesheet" href="../assets/animations.css">
+    <link rel="stylesheet" href="../assets/responsive.css">
 </head>
 <body>
     <header class="header">
