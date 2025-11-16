@@ -13,6 +13,8 @@ if (!isset($_SESSION['user_id'])) {
     <title>About Us - Transport Management</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/style.css">
+    <link rel="stylesheet" href="../assets/animations.css">
+    <link rel="stylesheet" href="../assets/responsive.css">
     <style>
         .hero-section {
             background: linear-gradient(135deg, var(--primary-color), var(--success-color));
