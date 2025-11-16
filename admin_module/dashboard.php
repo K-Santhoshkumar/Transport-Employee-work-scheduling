@@ -331,6 +331,10 @@ $recent_employees = $stmt->fetchAll();
                         <i class="fas fa-tachometer-alt"></i>
                         Dashboard
                     </a>
+                    <a href="reports.php" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        Reports
+                    </a>
                     <a href="users.php" class="nav-link">
                         <i class="fas fa-users"></i>
                         Users
@@ -338,6 +342,14 @@ $recent_employees = $stmt->fetchAll();
                     <a href="employees.php" class="nav-link">
                         <i class="fas fa-user-tie"></i>
                         Employees
+                    </a>
+                    <a href="buses.php" class="nav-link">
+                        <i class="fas fa-bus"></i>
+                        Buses & Routes
+                    </a>
+                    <a href="notifications.php" class="nav-link">
+                        <i class="fas fa-bell"></i>
+                        Notifications
                     </a>
                     <a href="schedules.php" class="nav-link">
                         <i class="fas fa-calendar"></i>
