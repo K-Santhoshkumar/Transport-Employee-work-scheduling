@@ -552,47 +552,48 @@ $recent_employees = $stmt->fetchAll();
                 </div>
             </div>
         </div>
-
-        <div class="table-container">
-            <div class="table-header">
-                <h2 class="table-title">Recent Employees</h2>
-                <a href="employees.php" class="btn btn-primary">Manage All</a>
-            </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Designation</th>
-                        <th>Department</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($recent_employees)): ?>
-                        <tr>
-                            <td colspan="6" style="text-align: center; color: var(--text-secondary);">No employees found</td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($recent_employees as $employee): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($employee['name']); ?></td>
-                                <td><?php echo htmlspecialchars($employee['email']); ?></td>
-                                <td><?php echo htmlspecialchars($employee['designation']); ?></td>
-                                <td><?php echo htmlspecialchars($employee['department']); ?></td>
-                                <td>
-                                    <span style="color: <?php echo $employee['status'] === 'Active' ? 'var(--success-color)' : 'var(--danger-color)'; ?>;">
-                                        <?php echo htmlspecialchars($employee['status']); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo date('M d, Y', strtotime($employee['created_at'])); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
     </main>
+
+    <?php
+    // Helper function to calculate time ago
+    function time_ago($timestamp) {
+        $difference = time() - $timestamp;
+        $periods = array("second", "minute", "hour", "day", "week", "month", "year");
+        $lengths = array("60","60","24","7","4.35","12","100");
+
+        for ($j = 0; $difference >= $lengths[$j] && $j < count($lengths)-1; $j++) {
+            $difference /= $lengths[$j];
+        }
+
+        $difference = round($difference);
+        if($difference != 1) {
+            $periods[$j] .= "s";
+        }
+
+        return "$difference $periods[$j] ago";
+    }
+    ?>
+
+    <script>
+        // Auto-refresh live stats every 30 seconds
+        setInterval(function() {
+            // In a real application, this would make an AJAX call to refresh stats
+            // For now, just showing the functionality
+            console.log('Refreshing dashboard stats...');
+        }, 30000);
+
+        // Add click handlers to quick action buttons
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                // Add a subtle loading effect
+                const originalContent = this.innerHTML;
+                this.style.opacity = '0.7';
+
+                setTimeout(() => {
+                    this.style.opacity = '1';
+                }, 300);
+            });
+        });
+    </script>
 </body>
 </html>
